@@ -56,7 +56,7 @@ public class JwtProvider implements Serializable {
     }
 
     private static JWTClaimsSet getJwtClaimsSet(UserPrincipal userPrincipal) {
-        return new JWTClaimsSet.Builder().subject(userPrincipal.getUsername()).expirationTime(getExpirationTime()).issuer("system").issueTime(getLocalDate()).build();
+        return new JWTClaimsSet.Builder().subject(userPrincipal.getUsername()).claim("auth",userPrincipal.getAuthorities()).expirationTime(getExpirationTime()).issuer("system").issueTime(getLocalDate()).build();
     }
 
     public static RSAPrivateKey readPrivateKey(Path filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {

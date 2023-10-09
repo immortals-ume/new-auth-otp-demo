@@ -3,6 +3,7 @@ package com.demo.auth.authdemoproject.service;
 
 import com.demo.auth.authdemoproject.mapper.UserMapper;
 import com.demo.auth.authdemoproject.model.dto.LoginInfoDto;
+import com.demo.auth.authdemoproject.model.dto.VerifyTokenRequestDTO;
 import com.demo.auth.authdemoproject.model.entity.User;
 import com.demo.auth.authdemoproject.model.enums.AuthProvider;
 import com.demo.auth.authdemoproject.repository.UserRepository;
@@ -50,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
 
+    private final OtpService otpService;
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = {Exception.class})
     @Override
@@ -78,33 +80,28 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public String login(@NotNull LoginInfoDto loginInfoDto) {
+    public Boolean login(@NotNull LoginInfoDto loginInfoDto) {
         Authentication authentication;
-        String signedJwt = "";
-        try {
-            if (loginInfoDto.getUserName() != null) {
-                authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginInfoDto.getUserName(), loginInfoDto.getPassword()));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        Boolean signedJwt = false;
+        if (loginInfoDto.getUserName() != null) {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginInfoDto.getUserName(), loginInfoDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
-                signedJwt = jwtProvider.generateJwtToken(authentication);
-
-
-                updateUserLoginLogout(loginInfoDto.getUserName(), getLocalDateTime(), Boolean.FALSE);
-            } else {
-                authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginInfoDto.getEmail(), loginInfoDto.getPassword()));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                signedJwt = jwtProvider.generateJwtToken(authentication);
-
-                updateUserLoginLogout(loginInfoDto.getEmail(), getLocalDateTime(), Boolean.FALSE);
+            if (authentication.isAuthenticated()) {
+                signedJwt = otpService.generateOtp(loginInfoDto.getUserName());
             }
 
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | JOSEException e) {
-            log.error("Error Occurred While Logging The User {}", e.getLocalizedMessage());
+        } else {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginInfoDto.getEmail(), loginInfoDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            if (authentication.isAuthenticated()) {
+                signedJwt = otpService.generateOtp(loginInfoDto.getUserName());
+            }
         }
+
         return signedJwt;
     }
 
@@ -120,6 +117,38 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String findEmailByUsername(String userNameOrEmail) {
         return findUser(userNameOrEmail).getEmail();
+    }
+
+    @Override
+    public String createTokenAfterVerifiedOtp(VerifyTokenRequestDTO verifyTokenRequest) {
+        Authentication authentication;
+        String signedJwt = "";
+        User user = findUser(verifyTokenRequest.getUsername());
+        try {
+            if (verifyTokenRequest.getUsername() != null) {
+                authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+                signedJwt = jwtProvider.generateJwtToken(authentication);
+
+
+                updateUserLoginLogout(user.getUserName(), getLocalDateTime(), Boolean.FALSE);
+            } else {
+                authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                signedJwt = jwtProvider.generateJwtToken(authentication);
+
+                updateUserLoginLogout(user.getEmail(), getLocalDateTime(), Boolean.FALSE);
+            }
+
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | JOSEException e) {
+            log.error("Error Occurred While Logging The User {}", e.getLocalizedMessage());
+        }
+        return signedJwt;
     }
 
     public User findUser(String userName) {

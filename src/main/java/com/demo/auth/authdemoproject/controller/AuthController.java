@@ -30,16 +30,11 @@ public class AuthController {
     private final OtpService otpService;
     @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> loginUser(@Valid @RequestBody LoginInfoDto loginInfoDto) {
+    public ResponseEntity<Boolean> loginUser(@Valid @RequestBody LoginInfoDto loginInfoDto) {
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-
-
-        responseHeaders.set(HEADER_STRING, TOKEN_PREFIX + authService.login(loginInfoDto));
 
         return ResponseEntity.ok()
-                .headers(responseHeaders)
-                .body("Authenticated the User Successfully");
+                .body(authService.login(loginInfoDto));
     }
 
     @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
@@ -69,7 +64,7 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        responseHeaders.set(HEADER_STRING, TOKEN_PREFIX + tokenProvider.createTokenAfterVerifiedOtp(verifyTokenRequest));
+        responseHeaders.set(HEADER_STRING, TOKEN_PREFIX + authService.createTokenAfterVerifiedOtp(verifyTokenRequest));
 
         return ResponseEntity.ok()
                 .headers(responseHeaders)
