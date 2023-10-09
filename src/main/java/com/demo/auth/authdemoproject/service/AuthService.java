@@ -12,4 +12,6 @@ public interface AuthService {
 
 
     Boolean checkUserNameIsAvailable(String userName);
+
+    String findEmailByUsername(String userNameOrEmail);
 }

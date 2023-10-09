@@ -117,6 +117,11 @@ public class AuthServiceImpl implements AuthService {
         return existsOrNot;
     }
 
+    @Override
+    public String findEmailByUsername(String userNameOrEmail) {
+        return findUser(userNameOrEmail).getEmail();
+    }
+
     public User findUser(String userName) {
         return Optional.ofNullable(userRepository.findByUserNameOrEmailAndActiveIndTrue(userName))
                 .orElseThrow(() -> new UsernameNotFoundException(" User not found"));

@@ -2,9 +2,11 @@ package com.demo.auth.authdemoproject.controller;
 
 
 import com.demo.auth.authdemoproject.model.dto.LoginInfoDto;
+import com.demo.auth.authdemoproject.model.dto.VerifyTokenRequestDTO;
 import com.demo.auth.authdemoproject.model.entity.UserProfile;
 import com.demo.auth.authdemoproject.security.CurrentUser;
 import com.demo.auth.authdemoproject.service.AuthService;
+import com.demo.auth.authdemoproject.service.OtpService;
 import com.demo.auth.authdemoproject.service.UserPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +27,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final OtpService otpService;
     @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> loginUser(@Valid @RequestBody LoginInfoDto loginInfoDto) {
@@ -55,5 +58,21 @@ public class AuthController {
     @PreAuthorize("hasRole('USER')")
     public UserProfile getCurrentUser(@CurrentUser UserPrincipal currentUser) {
         return new UserProfile(currentUser.getUsername(),currentUser.getEmail());
+    }
+    @PostMapping(value = "verify")
+    public  ResponseEntity<String> verifyOtp(@Valid @RequestBody VerifyTokenRequestDTO verifyTokenRequest)
+    {
+        HttpHeaders responseHeaders = new HttpHeaders();
+
+        boolean isOtpValid = otpService.validateOTP(verifyTokenRequest.getUsername(), verifyTokenRequest.getOtp());
+        if (!isOtpValid) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        responseHeaders.set(HEADER_STRING, TOKEN_PREFIX + tokenProvider.createTokenAfterVerifiedOtp(verifyTokenRequest));
+
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body("Authenticated the User Successfully");
     }
 }
