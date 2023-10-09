@@ -1,0 +1,69 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth_db?ssl=false
+    username: postgres
+    password: postgres
+  liquibase:
+    change-log: db/changelog-master.xml
+    enabled: false
+  jpa:
+    properties:
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _AUD_LOG
+            revision_field_name: REVISION_ID
+            revision_type_field_name: REVISION_TYPE
+    hibernate:
+      ddl-auto: update
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kapil.srivastava7799@gmail.com
+    password: ish
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: "env,beans"
+  server:
+    port: 9091
+  endpoint:
+    info:
+      cache:
+        time-to-live:
+
+logging:
+  level:
+    org.springframework: INFO
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui-custom.html
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  use-management-port: false
+
+auth:
+  key-location: src/main/resources
+  privateKeyFile: jwtRSA256-private.pem
+  publicKeyFile: jwtRSA256-public.pem
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:8080
+
+#smtp mail properties
+
+
