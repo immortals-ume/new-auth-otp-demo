@@ -13,6 +13,8 @@ public class VerifyTokenRequestDTO {
     @NotNull
     private String username;
 
+    private String password;
+
     @NotNull
     private Integer otp;
 

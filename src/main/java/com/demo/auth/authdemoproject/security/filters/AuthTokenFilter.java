@@ -36,7 +36,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    private final List<String> excludedMatchers = List.of("/api/v1/auth/register","/api/v1/auth/login");
+    private final List<String> excludedMatchers = List.of("/api/v1/auth/register","/api/v1/auth/login","/api/v1/auth/verify");
 
 
     @Override

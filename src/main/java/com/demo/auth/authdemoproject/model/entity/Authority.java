@@ -21,5 +21,4 @@ public class Authority {
     @JsonIgnore
     @ManyToMany(mappedBy = "authorities")
     private List<User> users;
-
 }

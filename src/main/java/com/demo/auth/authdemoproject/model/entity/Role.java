@@ -3,6 +3,7 @@ package com.demo.auth.authdemoproject.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Getter
 @Entity
 @Table(name = "role", schema = "public")
+@RequiredArgsConstructor
 public class Role {
 
     @Id
@@ -45,4 +47,13 @@ public class Role {
     @Column(name = "active_ind", nullable = false)
     private Boolean activeInd;
 
+    public Role(int i, String name, String userRole, LocalDateTime instant, long createdBy) {
+        this.roleId = i;
+        this.roleName = name;
+        this.description = userRole;
+        this.createdAt = instant;
+        this.createdBy = createdBy;
+        this.activeInd = Boolean.TRUE;
+
+    }
 }

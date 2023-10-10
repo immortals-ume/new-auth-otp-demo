@@ -4,8 +4,11 @@ package com.demo.auth.authdemoproject.service;
 import com.demo.auth.authdemoproject.mapper.UserMapper;
 import com.demo.auth.authdemoproject.model.dto.LoginInfoDto;
 import com.demo.auth.authdemoproject.model.dto.VerifyTokenRequestDTO;
+import com.demo.auth.authdemoproject.model.entity.Authority;
+import com.demo.auth.authdemoproject.model.entity.Role;
 import com.demo.auth.authdemoproject.model.entity.User;
 import com.demo.auth.authdemoproject.model.enums.AuthProvider;
+import com.demo.auth.authdemoproject.model.enums.Roles;
 import com.demo.auth.authdemoproject.repository.UserRepository;
 import com.demo.auth.authdemoproject.security.jwt.JwtProvider;
 import com.demo.auth.authdemoproject.service.exception.UserAlreadyExistsException;
@@ -29,9 +32,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.demo.auth.authdemoproject.util.DateUtils.getLocalDateTime;
 import static com.demo.auth.authdemoproject.util.ValidateCredentialsUtils.validateEmail;
@@ -64,6 +65,8 @@ public class AuthServiceImpl implements AuthService {
         if (Optional.ofNullable(userRepository.findByUserNameOrEmailAndActiveIndTrue(loginInfoDto.getUserName())).isPresent()) {
             throw new UserAlreadyExistsException("User Already Exists with this UserName");
         }
+        Set<Role> roles=  new HashSet<>();  Set<Authority> authorities=  new HashSet<>();
+
         validateEmail(loginInfoDto.getEmail());
         User user = userMapper.toUser(loginInfoDto);
         user.setPassword(getPassword(loginInfoDto.getPassword()));
@@ -71,11 +74,15 @@ public class AuthServiceImpl implements AuthService {
         user.setCreatedAt(getLocalDateTime());
         user.setActiveInd(Boolean.TRUE);
         user.setAuthProvider(AuthProvider.FORM_LOGIN);
+        roles.add(new Role(1,Roles.ROLE_USER.name(),"user Role",getLocalDateTime(),1L));
+        user.setRoles(roles);
+//        (authorities.add(new Authority(AuthorityName.ROLE_USER.name(),));
+        user.setRoles(roles);
+        user.setAuthorities(authorities);
         return userRepository.saveAndFlush(user).getUserName();
     }
 
     private String getPassword(String password) {
-       // validatePassword(password);
         return encoder.encode(password);
     }
 
@@ -129,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             if (verifyTokenRequest.getUsername() != null) {
                 authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
+                        new UsernamePasswordAuthenticationToken(user.getUserName(), verifyTokenRequest.getPassword()));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
 
@@ -139,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
                 updateUserLoginLogout(user.getUserName(), getLocalDateTime(), Boolean.FALSE);
             } else {
                 authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+                        new UsernamePasswordAuthenticationToken(user.getEmail(), verifyTokenRequest.getPassword()));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 signedJwt = jwtProvider.generateJwtToken(authentication);
