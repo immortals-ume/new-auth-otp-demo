@@ -28,13 +28,12 @@ public class AuthController {
     private final AuthService authService;
 
     private final OtpService otpService;
-    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
+    @GetMapping(value = "/login", consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Boolean> loginUser(@Valid @RequestBody LoginInfoDto loginInfoDto) {
+    public Boolean loginUser(@Valid @RequestBody LoginInfoDto loginInfoDto) {
 
 
-        return ResponseEntity.ok()
-                .body(authService.login(loginInfoDto));
+        return authService.login(loginInfoDto);
     }
 
     @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")

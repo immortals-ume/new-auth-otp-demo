@@ -158,7 +158,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorDto> handleAll(final Exception e) {
-        logger.error(e.getClass().getName() + "Encountered" + " " + e);
+        logger.error(e.getClass().getName() + "Encountered" + " " + e.getLocalizedMessage());
         final ErrorDto errorDto = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR, getInstant(), e.getLocalizedMessage(), Collections.singletonList("Error At Server End, Please try After Sometime"));
         return new ResponseEntity<>(errorDto, new HttpHeaders(), errorDto.getStatus());
     }

@@ -29,11 +29,12 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.demo.auth.authdemoproject.util.DateUtils.getLocalDateTime;
 import static com.demo.auth.authdemoproject.util.ValidateCredentialsUtils.validateEmail;
-import static com.demo.auth.authdemoproject.util.ValidateCredentialsUtils.validatePassword;
 
 @Slf4j
 @Service
@@ -74,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String getPassword(String password) {
-        validatePassword(password);
+       // validatePassword(password);
         return encoder.encode(password);
     }
 
@@ -83,22 +84,23 @@ public class AuthServiceImpl implements AuthService {
     public Boolean login(@NotNull LoginInfoDto loginInfoDto) {
         Authentication authentication;
         Boolean signedJwt = false;
+        List<String>  emails = new ArrayList<>() ;
         if (loginInfoDto.getUserName() != null) {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginInfoDto.getUserName(), loginInfoDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            emails.add(findUser(loginInfoDto.getUserName()).getEmail());
             if (authentication.isAuthenticated()) {
-                signedJwt = otpService.generateOtp(loginInfoDto.getUserName());
+                signedJwt = otpService.generateOtp(loginInfoDto.getUserName(),emails);
             }
 
         } else {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginInfoDto.getEmail(), loginInfoDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            emails.add(loginInfoDto.getEmail());
             if (authentication.isAuthenticated()) {
-                signedJwt = otpService.generateOtp(loginInfoDto.getUserName());
+                signedJwt = otpService.generateOtp(loginInfoDto.getEmail(),emails);
             }
         }
 

@@ -36,13 +36,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    private final List<String> excludedMatchers = List.of("/api/v1/auth/**", "**/oauth2/**");
+    private final List<String> excludedMatchers = List.of("/api/v1/auth/register","/api/v1/auth/login");
 
 
     @Override
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         return excludedMatchers.stream()
-                .anyMatch(matcher -> matcher.matches(String.valueOf(request)));
+                .anyMatch(matcher -> matcher.matches(String.valueOf(request.getRequestURI())));
     }
 
 

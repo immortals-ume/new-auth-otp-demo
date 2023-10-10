@@ -4,11 +4,10 @@ package com.demo.auth.authdemoproject.service;
 import com.demo.auth.authdemoproject.model.dto.EmailDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -16,7 +15,8 @@ import java.util.stream.Collectors;
 public class EmailService {
 
 
-    private final JavaMailSender emailSender;
+    @Autowired
+    private  JavaMailSender emailSender;
 
     /**
      * Method for sending simple e-mail message.
@@ -25,7 +25,7 @@ public class EmailService {
     public Boolean sendSimpleMessage(EmailDTO emailDTO)
     {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(emailDTO.getRecipients().stream().collect(Collectors.joining(",")));
+        mailMessage.setTo(String.join(",", emailDTO.getRecipients()));
         mailMessage.setSubject(emailDTO.getSubject());
         mailMessage.setText(emailDTO.getBody());
 

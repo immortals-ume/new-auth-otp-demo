@@ -24,8 +24,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "Enter your email "
-    password: "Enter your password "
+    username: "provide your email"
+    password: "Provide your password "
     properties:
       mail:
         smtp:
@@ -40,10 +40,6 @@ management:
         exclude: "env,beans"
   server:
     port: 9091
-  endpoint:
-    info:
-      cache:
-        time-to-live:
 
 logging:
   level:
@@ -64,6 +60,6 @@ auth:
   cors:
     allowed-origins: http://localhost:3000,http://localhost:8080
 
-#smtp mail properties
+
 
 

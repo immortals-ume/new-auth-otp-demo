@@ -9,10 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class UserPrincipal implements UserDetails {
 
@@ -44,15 +44,10 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(), authorities);
     }
 
-    private static List<GrantedAuthority> getAuthority(Collection<Role> roles) {      List<GrantedAuthority> authorities = new ArrayList<>();
-        for (Role role: roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getRoleName().name()));
-            authorities.addAll(role.getPrivileges()
-                    .stream()
-                    .map(p -> new SimpleGrantedAuthority(p.getName()))
-                    .toList());
-        }
-        return authorities;
+    private static List<GrantedAuthority> getAuthority(Collection<Role> roles) {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .collect(Collectors.toList());
 
     }
 

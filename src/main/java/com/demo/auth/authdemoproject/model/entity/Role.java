@@ -1,12 +1,13 @@
 package com.demo.auth.authdemoproject.model.entity;
 
-import com.demo.auth.authdemoproject.model.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -19,9 +20,15 @@ public class Role {
     @Column(name = "role_id", nullable = false)
     private Integer roleId;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "role_name", nullable = true, length = 20)
-    private Roles roleName;
+    private String roleName;
+
+    @Column(name = "description")
+    private String description;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
@@ -38,10 +45,4 @@ public class Role {
     @Column(name = "active_ind", nullable = false)
     private Boolean activeInd;
 
-    @ManyToMany(mappedBy = "roles")
-    private Collection<User> users;
-
-    @ManyToMany
-    @JoinTable(name = "roles_privileges", joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "user_id"), inverseJoinColumns = @JoinColumn(name = "privilege_id", referencedColumnName = "id"))
-    private Collection<Privilege> privileges;
 }
